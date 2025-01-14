@@ -36,6 +36,13 @@ else()
         -Wstrict-prototypes
     )
 endif()
+
+if (PSP)
+    target_compile_options(dethrace_obj PRIVATE
+        -O3 -funroll-loops -fno-math-errno -ffast-math -fpermissive
+    )
+endif()
+
 target_compile_definitions(dethrace_obj PRIVATE INSIDE_DETHRACE)
 if(DETHRACE_FIX_BUGS)
     target_compile_definitions(dethrace_obj PRIVATE DETHRACE_FIX_BUGS)
@@ -244,4 +251,13 @@ if(DETHRACE_INSTALL)
             OPTIONAL
         )
     endif()
+endif()
+
+if(PSP)
+create_pbp_file(TARGET dethrace 
+  TITLE "${CMAKE_PROJECT_NAME}"
+  ICON_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
+  # BACKGROUND_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
+  # PREVIEW_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
+)
 endif()

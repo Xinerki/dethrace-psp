@@ -326,6 +326,7 @@ int PDNetInitialise(void) {
     so_linger.l_linger = 0;
     setsockopt(gSocket, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
 
+#ifndef __PSP__
     unsigned long nobio = 1;
     if (ioctlsocket(gSocket, FIONBIO, &nobio) == -1) {
         dr_dprintf("Error on ioctlsocket() - WSAGetLastError=%d", WSAGetLastError());
@@ -333,6 +334,7 @@ int PDNetInitialise(void) {
         WSACleanup();
         return -1;
     }
+#endif
 
     if (harness_game_config.no_bind == 0) {
         if (bind(gSocket, (struct sockaddr*)&gLocal_addr, sizeof(gLocal_addr)) == -1) {

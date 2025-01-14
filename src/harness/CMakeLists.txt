@@ -79,6 +79,13 @@ elseif(APPLE)
     target_sources(harness PRIVATE
         os/macos.c
     )
+elseif(PSP)
+    target_sources(harness PRIVATE
+        os/psp.c
+        )
+    target_link_libraries(harness
+    PRIVATE SDL2::SDL2 
+    PRIVATE ${PSP_LIBRARIES} atomic)
 else()
     target_sources(harness PRIVATE
         os/linux.c
