@@ -56,7 +56,6 @@ Linux:
 apt-get install libsdl2-dev
 ```
 
-
 Point Dethrace at the Carmageddon install directory:
 ```sh
 export DETHRACE_ROOT_DIR=/path/to/carmageddon
@@ -83,6 +82,16 @@ cmake ..
 Once cmake has generated the build files for your platform, run the build. For example:
 ```sh
 make
+```
+
+### PSP
+Building for PSP uses SDL2 and [pspdev](https://pspdev.github.io/installation.html) toolchain with [pspsdk](https://github.com/pspdev/pspsdk).
+
+To generate the build files:
+```sh
+mkdir build
+cd build
+psp-cmake ..
 ```
 
 ## Running the game
