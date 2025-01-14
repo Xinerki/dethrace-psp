@@ -66,6 +66,7 @@ if (IO_PLATFORM STREQUAL "SDL2")
     target_sources(harness PRIVATE
         platforms/sdl2.c
         platforms/sdl2_scancode_to_dinput.h
+        platforms/sdl2_gamepad_to_dinput.h
     )
     target_link_libraries(harness PRIVATE SDL2::SDL2)
 endif()
@@ -82,7 +83,7 @@ elseif(APPLE)
 elseif(PSP)
     target_sources(harness PRIVATE
         os/psp.c
-        )
+    )
     target_link_libraries(harness
     PRIVATE SDL2::SDL2 
     PRIVATE ${PSP_LIBRARIES} atomic)

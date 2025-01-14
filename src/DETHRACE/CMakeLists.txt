@@ -37,7 +37,7 @@ else()
     )
 endif()
 
-if (PSP)
+if(PSP)
     target_compile_options(dethrace_obj PRIVATE
         -O3 -funroll-loops -fno-math-errno -ffast-math -fpermissive
     )
