@@ -5,6 +5,7 @@
 #include "harness/hooks.h"
 #include "harness/trace.h"
 #include "sdl2_scancode_to_dinput.h"
+#include "sdl2_gamepad_to_dinput.h"
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -23,6 +24,10 @@ static void* create_window_and_renderer(char* title, int x, int y, int width, in
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         LOG_PANIC("SDL_INIT_VIDEO error: %s", SDL_GetError());
+    }
+
+    if(SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) != 0) {
+        LOG_WARN("SDL_INIT_GAMECONTROLLER error: %s", SDL_GetError());
     }
 
     window = SDL_CreateWindow(title,
@@ -116,6 +121,24 @@ static int get_and_handle_message(MSG_* msg) {
             // DInput expects high bit to be set if key is down
             // https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee418261(v=vs.85)
             directinput_key_state[dinput_key] = (event.type == SDL_KEYDOWN ? 0x80 : 0);
+            break;
+
+        case SDL_CONTROLLERDEVICEADDED:
+            SDL_GameControllerOpen(event.cdevice.which);
+            break;
+
+        // TODO: case for removed device
+
+        case SDL_CONTROLLERBUTTONDOWN:
+            // code duplication bwoomp
+            dinput_key = sdlGamepadToDirectInputKeyNum[event.cbutton.button];
+            directinput_key_state[dinput_key] = 0x80;
+            break;
+
+        case SDL_CONTROLLERBUTTONUP:
+            // code duplication bwoomp
+            dinput_key = sdlGamepadToDirectInputKeyNum[event.cbutton.button];
+            directinput_key_state[dinput_key] = 0x0;
             break;
 
         case SDL_WINDOWEVENT:
