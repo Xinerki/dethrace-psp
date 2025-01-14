@@ -1,3 +1,5 @@
 [submodule "lib/BRender-v1.3.2"]
 	path = lib/BRender-v1.3.2
-	url = https://github.com/dethrace-labs/BRender-v1.3.2.git
+	url = https://github.com/Xinerki/BRender-v1.3.2-psp
+[submodule "BRender-v1.3.2/"]
+	url = https://github.com/Xinerki/BRender-v1.3.2-psp
