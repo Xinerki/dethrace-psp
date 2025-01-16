@@ -958,6 +958,12 @@ int original_main(int pArgc, char** pArgv) {
         }
     }
 
+#ifdef __PSP__
+    gAustere_override = 1;
+    gCar_simplification_level = 4;
+    gSound_override = 1;
+#endif
+
     gNetwork_profile_fname[0] = 0;
     uint32_t len = GetCurrentDirectoryA_(240, gNetwork_profile_fname);
     if (len > 0 && len == strlen(gNetwork_profile_fname)) {
