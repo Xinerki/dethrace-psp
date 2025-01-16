@@ -87,6 +87,12 @@ static int is_only_key_modifier(int modifier_flags, int flag_check) {
     return (modifier_flags & flag_check) && (modifier_flags & (KMOD_CTRL | KMOD_SHIFT | KMOD_ALT | KMOD_GUI)) == (modifier_flags & flag_check);
 }
 
+#define JOYSTICK_SENSITIVITY 16000
+int mouse_x_dir = 0;
+int mouse_y_dir = 0;
+int mouse_x = 0;
+int mouse_y = 0;
+
 static int get_and_handle_message(MSG_* msg) {
     SDL_Event event;
     int dinput_key;
@@ -140,6 +146,15 @@ static int get_and_handle_message(MSG_* msg) {
             dinput_key = sdlGamepadToDirectInputKeyNum[event.cbutton.button];
             directinput_key_state[dinput_key] = 0x0;
             break;
+        
+        case SDL_JOYAXISMOTION:
+            if (event.jaxis.axis == 0) {
+                mouse_x_dir = event.jaxis.value / JOYSTICK_SENSITIVITY;
+            }
+            else if(event.jaxis.axis == 1) {
+                mouse_y_dir = event.jaxis.value / JOYSTICK_SENSITIVITY;
+            }
+            break;
 
         case SDL_WINDOWEVENT:
             if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
@@ -174,6 +189,7 @@ static int get_mouse_buttons(int* pButton1, int* pButton2) {
     return 0;
 }
 
+/*
 static int get_mouse_position(int* pX, int* pY) {
     float lX, lY;
     if (SDL_GetMouseFocus() != window) {
@@ -193,7 +209,16 @@ static int get_mouse_position(int* pX, int* pY) {
     *pX = (int)lX;
     *pY = (int)lY;
     return 0;
+}*/
+
+static int get_mouse_position(int *pX, int* pY)
+{
+    mouse_x += mouse_x_dir;
+    mouse_y += mouse_y_dir;
+    *pX = mouse_x;
+    *pY = mouse_y;
 }
+
 
 static void limit_fps(void) {
     Uint32 now = SDL_GetTicks();
