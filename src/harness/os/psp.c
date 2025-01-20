@@ -4,9 +4,6 @@
 #include <pspdisplay.h>
 #include <pspkernel.h>
 
-PSP_MODULE_INFO("DETHRACE", 0, 1, 0);
-PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
-
 void resolve_full_path(char* path, const char* argv0) {
     return;
 }
