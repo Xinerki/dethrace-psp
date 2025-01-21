@@ -50,19 +50,11 @@ int setup_callbacks(void) {
 
 void* fbp0;
 void* fbp1;
-char list[0x20000] __attribute__((aligned(64)));
+char list[0x40000] __attribute__((aligned(64)));
 
 static void psp_quit(void* wnd) {
     sceGuDisplay(GU_FALSE);
     sceGuTerm();
-}
-
-static void psp_sleep(uint32_t ms) {
-    const uint32_t max_delay = 0xFFFFFFFFUL / 1000;
-    if (ms > max_delay) {
-        ms = max_delay;
-    }
-    sceKernelDelayThreadCB(ms * 1000);
 }
 
 typedef struct
@@ -82,76 +74,50 @@ typedef struct
 
 uint32_t converted_palette[256];
 br_pixelmap* last_screen_src;
+static unsigned int __attribute__((aligned(16))) pixels[512 * 272];
+void* framebuffer = 0;
 
-void* buffer = 0;
 static void psp_present(br_pixelmap* src) {
     uint8_t* src_pixels = src->pixels;
-    uint32_t* dest_pixels = 0;
+    // uint32_t* dest_pixels = 0;
 
-    for (int i = 0; i < src->height * src->width; i++) {
-        *dest_pixels = converted_palette[*src_pixels];
-        dest_pixels++;
-        src_pixels++;
+    for (unsigned int y = 0; y < 272; y++) {
+        for (unsigned int x = 0; x < 512; x++) {
+            if (x < src->width && y < src->height) {
+                int i = (y * 512) + x;
+                uint8_t pixel = src_pixels[x * y];
+
+                uint32_t c = converted_palette[pixel];
+                pixels[i] = c;
+            }
+        }
     }
 
-    // texture->data = dest_pixels;
+    sceKernelDcacheWritebackAll();
 
-    sceKernelDcacheWritebackInvalidateAll();
-
-    // start frame
     sceGuStart(GU_DIRECT, list);
-    sceGuClearColor(0xFF00FF00); // green!
-    sceGuClear(GU_COLOR_BUFFER_BIT);
 
-    // draw
-    static TextureVertex vertices[2];
+    sceGuCopyImage(GU_PSM_8888, 0, 0, 480, 272, 512, pixels, 0, 0, 512,
+        (void*)(0x04000000 + (u32)framebuffer));
+    sceGuTexSync();
 
-    vertices[0].u = 0.0f;
-    vertices[0].v = 0.0f;
-    vertices[0].colour = 0xFFFFFFFF;
-    vertices[0].x = 0.0f;
-    vertices[0].y = 0.0f;
-    vertices[0].z = 0.0f;
-
-    vertices[1].u = 480.0;
-    vertices[1].v = 272.0;
-    vertices[1].colour = 0xFFFFFFFF;
-    vertices[1].x = 0.0f + 480.0;
-    vertices[1].y = 0.0f + 272.0;
-    vertices[1].z = 0.0f;
-
-    // sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
-    sceGuTexMode(GU_PSM_4444, 0, 0, GU_FALSE);
-    sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
-    sceGuTexImage(0, src->width, src->height, src->width, src_pixels);
-
-    sceGuEnable(GU_TEXTURE_2D);
-    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
-    sceGuDisable(GU_TEXTURE_2D);
-
-    // end frame
     sceGuFinish();
     sceGuSync(0, 0);
 
-    pspDebugScreenSetOffset((int)buffer);
-    pspDebugScreenSetXY(0, 0);
-    pspDebugScreenPrintf("swag");
-
-    sceDisplayWaitVblankStart();
-    buffer = sceGuSwapBuffers();
-
+    framebuffer = sceGuSwapBuffers();
     last_screen_src = src;
 }
 
 static void set_palette(PALETTEENTRY_* pal) {
     for (int i = 0; i < 256; i++) {
-        converted_palette[i] = (0xff << 24 | pal[i].peRed << 16 | pal[i].peGreen << 8 | pal[i].peBlue);
+        // converted_palette[i] = (0xff << 24 | pal[i].peRed << 16 | pal[i].peGreen << 8 | pal[i].peBlue);
+        converted_palette[i] = (0xff << 24 | pal[i].peBlue << 16 | pal[i].peGreen << 8 | pal[i].peRed);
     }
 
     // sceGuClutMode(GU_PSM_4444, 0, 255, 0);
     // sceGuClutLoad(256 / 8, converted_palette);
 
-    sceKernelDcacheWritebackAll();
+    // sceKernelDcacheWritebackAll();
 
     if (last_screen_src != NULL) {
         psp_present(last_screen_src);
@@ -160,18 +126,32 @@ static void set_palette(PALETTEENTRY_* pal) {
 
 // thanks SDL2
 uint64_t start_tick = 0;
-uint64_t ticks;
+
 static uint64_t PSP_Ticks(void) {
+
+    uint64_t ticks;
     sceRtcGetCurrentTick(&ticks);
     return ticks;
 }
 
 uint64_t psp_get_ticks64(void) {
-    return (PSP_Ticks() - start_tick) / sceRtcGetTickResolution();
+    if (start_tick == 0) {
+        start_tick = PSP_Ticks();
+    }
+
+    return (PSP_Ticks() - start_tick) / 1000ULL;
 }
 
 static uint32_t psp_get_ticks(void) {
-    return (uint32_t)(psp_get_ticks64());
+    return (uint32_t)(psp_get_ticks64() & 0xFFFFFFFF);
+}
+
+static void psp_sleep(uint32_t ms) {
+    const uint32_t max_delay = 0xFFFFFFFFUL / 1000;
+    if (ms > max_delay) {
+        ms = max_delay;
+    }
+    sceKernelDelayThreadCB(ms * 1000);
 }
 
 static int psp_get_and_handle_message(MSG_* msg) {
@@ -212,7 +192,13 @@ static void* psp_init(char* title, int x, int y, int width, int height) {
     running = 1;
 
     setup_callbacks();
-    pspDebugScreenInit();
+
+    // texture = (Texture*)calloc(1, sizeof(Texture));
+    if (start_tick == 0) {
+        start_tick = PSP_Ticks();
+    }
+
+    // pspDebugScreenInit();
     sceGuInit();
 
     fbp0 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
@@ -236,13 +222,6 @@ static void* psp_init(char* title, int x, int y, int width, int height) {
     // Start a new frame and enable the display
     sceGuFinish();
     sceGuDisplay(GU_TRUE);
-
-    pspDebugScreenInit();
-
-    // texture = (Texture*)calloc(1, sizeof(Texture));
-    if (start_tick == 0) {
-        start_tick = PSP_Ticks();
-    }
 
     return 0;
 }
