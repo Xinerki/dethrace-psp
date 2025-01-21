@@ -179,18 +179,20 @@ static void psp_present(br_pixelmap* src) {
     vertices[0].u = 0.0f;
     vertices[0].v = 0.0f;
     vertices[0].colour = 0xFFFFFFFF;
-    vertices[0].x = 0.0f;
+    vertices[0].x = 8.0f;
     vertices[0].y = 0.0f;
     vertices[0].z = 0.0f;
 
-    vertices[1].u = 480.0f;
-    vertices[1].v = 272.0f;
+    // vertices[1].u = 512.0f;
+    // vertices[1].v = 272.0f;
+    vertices[1].u = (float)src->width + 32.0f;
+    vertices[1].v = (float)src->height;
     vertices[1].colour = 0xFFFFFFFF;
-    vertices[1].x = 480.0f;
+    vertices[1].x = 8.0f + 512.0f;
     vertices[1].y = 272.0f;
     vertices[1].z = 0.0f;
 
-    sceGuClutMode(GU_PSM_8888, 0, 0xff, 0);      // 32-bit palette
+    sceGuClutMode(GU_PSM_8888, 0, 0xFF, 0);      // 32-bit palette
     sceGuClutLoad((256 / 8), converted_palette); // upload 32*8 entries (256)
     sceGuTexMode(GU_PSM_T8, 0, 0, GU_FALSE);
     sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
@@ -199,7 +201,7 @@ static void psp_present(br_pixelmap* src) {
 
     sceGuEnable(GU_TEXTURE_2D);
     sceGuDrawArray(GU_SPRITES,
-        GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
+        GU_COLOR_4444 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
         2, 0, vertices);
     sceGuDisable(GU_TEXTURE_2D);
 

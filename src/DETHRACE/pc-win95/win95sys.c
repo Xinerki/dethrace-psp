@@ -959,7 +959,7 @@ int original_main(int pArgc, char** pArgv) {
     }
 
 #ifdef __PSP__
-    gAustere_override = 1;
+    // gAustere_override = 1;
     gReplay_override = 1;
     gCar_simplification_level = 4;
     gSound_override = 1;
