@@ -5,12 +5,12 @@ option(DETHRACE_REPLAY_DEBUG "Debug replay" OFF)
 
 target_include_directories(dethrace_obj
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        common
-        pd
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    common
+    pd
 )
 
-if (DETHRACE_ASAN)
+if(DETHRACE_ASAN)
     target_compile_options(dethrace_obj PUBLIC -fsanitize=address)
     target_link_options(dethrace_obj PUBLIC -fsanitize=address)
 endif()
@@ -246,7 +246,7 @@ if(DETHRACE_INSTALL)
         )
     endif()
     if(WIN32)
-        install(FILES  $<TARGET_RUNTIME_DLLS:dethrace>
+        install(FILES $<TARGET_RUNTIME_DLLS:dethrace>
             DESTINATION "."
             OPTIONAL
         )
@@ -254,10 +254,10 @@ if(DETHRACE_INSTALL)
 endif()
 
 if(PSP)
-create_pbp_file(TARGET dethrace 
-  TITLE "${CMAKE_PROJECT_NAME}"
-  ICON_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
-  # BACKGROUND_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
-  # PREVIEW_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
-)
+    create_pbp_file(TARGET dethrace
+        TITLE "${CMAKE_PROJECT_NAME}"
+        ICON_PATH ${CMAKE_SOURCE_DIR}/packaging/psp/ICON0.png
+        BACKGROUND_PATH ${CMAKE_SOURCE_DIR}/packaging/psp/PIC0.png
+        # PREVIEW_PATH ${CMAKE_SOURCE_DIR}/packaging/icon_source.png
+    )
 endif()
