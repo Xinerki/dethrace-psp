@@ -25,9 +25,9 @@ size_t OS_ConsoleReadPassword(char* pBuffer, size_t pBufferLen) {
 }
 
 char* OS_Basename(const char* path) {
-    return "./CARMDEMO";
+    return "CARMDEMO";
 }
 
 char* OS_GetWorkingDirectory(char* argv0) {
-    return "./CARMDEMO";
+    return "CARMDEMO";
 }
