@@ -197,7 +197,7 @@ static void psp_present(br_pixelmap* src) {
     sceGuTexMode(GU_PSM_T8, 0, 0, GU_FALSE);
     sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
     sceGuTexImage(0, 512, 272, 512, pixels);
-    sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+    sceGuTexFilter(GU_NEAREST, GU_NEAREST);
 
     sceGuEnable(GU_TEXTURE_2D);
     sceGuDrawArray(GU_SPRITES,
